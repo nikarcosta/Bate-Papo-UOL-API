@@ -52,17 +52,43 @@ server.post("/participants", async (req, res) => {
 });
 
 
-server.get("/participants", async (res, req) => {
+server.get("/participants", async (req, res) => {
 
     try {
+
         const dados = await db.collection("participants").find().toArray()
 
-        return res.send(dados)
+        return res.send(dados);
+
     } catch (error) {
         res.status(500).send("Erro no servidor");
     }
 })
 
+server.post("/messages", async (req,res) => {
+    const { user } = req.headers; 
+    const { to, text, type } = req.body;
+
+
+    try {
+
+        await db.collection("messages").insertOne({
+            from: user,
+            to,
+            text,
+            type,
+            time: dayjs().format('HH:mm:ss')
+        })
+
+        return res.sendStatus(201);
+
+    } catch (error) {
+
+        res.sendStatus(422);
+        
+    }
+
+})
 
 const PORT = 5000;
 
