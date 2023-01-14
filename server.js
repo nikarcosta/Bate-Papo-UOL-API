@@ -38,7 +38,13 @@ server.post("/participants", async (req, res) => {
             lastStatus: Date.now()
         });
 
-        await db.collection("messages").insertOne({from: name, to: 'Todos', text: 'entra na sala...', type: 'status', time: dayjs().format('HH:mm:ss')});
+        await db.collection("messages").insertOne({
+            from: name, 
+            to: 'Todos', 
+            text: 'entra na sala...', 
+            type: 'status', 
+            time: dayjs().format('HH:mm:ss')
+        });
     
         res.sendStatus(201);   
 
@@ -85,10 +91,50 @@ server.post("/messages", async (req,res) => {
     } catch (error) {
 
         res.sendStatus(422);
-        
+
     }
 
-})
+});
+
+server.get("/messages", async (req,res) => {
+    const limit = parseInt(req.query.limit);
+    const { user } = req.headers;
+
+    console.log(limit);
+
+    try {
+        const mensagens = await db.collection("messages").find().toArray();
+
+        const mensagensFiltradas = mensagens.filter(mensagem => {
+
+            const { from, to, type } = mensagem;
+            const mensagemDoUsuario = from === user;
+            const mensagemParaUsuario = to === user;
+            const mensagemPublica = type === "message"|| to === "Todos";
+
+            if(mensagemDoUsuario || mensagemParaUsuario || mensagemPublica){
+                return true;
+            } else {
+                return false;
+            }
+        });
+
+        if(!limit || limit > mensagensFiltradas.length){
+
+            return res.send(mensagensFiltradas);
+
+        } else {
+        
+            let start = mensagensFiltradas.length - limit;
+            res.send([...mensagensFiltradas].splice(start,limit));
+        }
+        
+
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+});
 
 const PORT = 5000;
 
