@@ -3,6 +3,7 @@ import cors from "cors";
 import dayjs from "dayjs";
 import { MongoClient } from "mongodb";
 import dotenv from "dotenv";
+import joi from "joi";
 
 dotenv.config();
 
@@ -25,6 +26,20 @@ server.use(cors());
 
 
 server.post("/participants", async (req, res) => {
+    const participante = req.body;
+
+    const userSchema = joi.object({
+        name: joi.string().required()
+    });
+
+    const validation = userSchema.validate(participante);
+
+    if(validation.error){
+        let errors = validation.error.details.map((detail) => detail.message);
+        console.log(errors);
+        return res.sendStatus(422);
+    }
+
     const { name } = req.body;
 
     try {
@@ -90,6 +105,7 @@ server.post("/messages", async (req,res) => {
 
     } catch (error) {
 
+        console.log(error);
         res.sendStatus(422);
 
     }
