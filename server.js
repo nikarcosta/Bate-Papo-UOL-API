@@ -175,6 +175,25 @@ server.get("/messages", async (req,res) => {
     }
 });
 
+server.post("/status", async (req, res) => {
+    const { user } = req.headers;
+
+    try{
+
+        const usuarioExiste = await db.collection("participants").findOne({name: user});
+
+        if(!usuarioExiste) res.sendStatus(404);
+
+        await db.collection("participants").updateOne({name: user}, {$set: {lastStatus: Date.now()}});
+
+    }catch (error) {
+        
+        console.log(error);
+        res.sendStatus(500);
+    }
+});
+
+
 const PORT = 5000;
 
 server.listen(PORT, () => {
