@@ -88,10 +88,34 @@ server.get("/participants", async (req, res) => {
 
 server.post("/messages", async (req,res) => {
     const { user } = req.headers; 
+    console.log(req.headers);
+    const mensagem = req.body;
+
+    
+     const userSchema = joi.object({
+        to: joi.string().required(),
+        text: joi.string().required(),
+        type: joi.string().valid('message','private_message').required()
+     });   
+
+     const validation = userSchema.validate(mensagem, { abortEarly: false});
+
+
+    if(validation.error){
+        let errors = validation.error.details.map((detail) => detail.message);
+        console.log(errors);
+        return res.sendStatus(422);
+    }
+
+
     const { to, text, type } = req.body;
 
 
     try {
+
+        const usuarioExiste = await db.collection("participants").findOne({name: user});
+
+        if(!usuarioExiste) return res.status(422).send("Usuário não encontrado");
 
         await db.collection("messages").insertOne({
             from: user,
@@ -107,7 +131,6 @@ server.post("/messages", async (req,res) => {
 
         console.log(error);
         res.sendStatus(422);
-
     }
 
 });
