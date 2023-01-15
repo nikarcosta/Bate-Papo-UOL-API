@@ -139,7 +139,6 @@ server.get("/messages", async (req,res) => {
     const limit = parseInt(req.query.limit);
     const { user } = req.headers;
 
-    console.log(limit);
 
     try {
         const mensagens = await db.collection("messages").find().toArray();
@@ -158,9 +157,21 @@ server.get("/messages", async (req,res) => {
             }
         });
 
-        if(!limit || limit > mensagensFiltradas.length){
 
-            return res.send(mensagensFiltradas);
+        if(limit <= 0){
+
+            return res.sendStatus(422);
+
+        } else if(!limit || limit > mensagensFiltradas.length){
+
+            const mensagensFiltradasFormatadas = mensagensFiltradas.map((mensagemFormatada) => ({
+                to: mensagemFormatada.to,
+                text: mensagemFormatada.text,
+                type: mensagemFormatada.type,
+                from: mensagemFormatada.from
+            }));
+            
+            return res.send(mensagensFiltradasFormatadas);
 
         } else {
         
