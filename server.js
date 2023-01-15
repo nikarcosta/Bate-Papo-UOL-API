@@ -137,6 +137,7 @@ server.post("/messages", async (req,res) => {
 
 server.get("/messages", async (req,res) => {
     const limit = parseInt(req.query.limit);
+
     const { user } = req.headers;
 
 
@@ -158,11 +159,7 @@ server.get("/messages", async (req,res) => {
         });
 
 
-        if(limit <= 0 || limit === NaN){
-
-            return res.sendStatus(422);
-
-        } else if(!limit || limit > mensagensFiltradas.length){
+        if(req.query.limit === undefined || limit > mensagensFiltradas.length){
 
             const mensagensFiltradasFormatadas = mensagensFiltradas.map((mensagemFormatada) => ({
                 to: mensagemFormatada.to,
@@ -173,6 +170,10 @@ server.get("/messages", async (req,res) => {
             }));
             
             return res.send(mensagensFiltradasFormatadas);
+
+        } else if(limit <= 0 || Number.isNaN(limit)){
+
+            return res.sendStatus(422);
 
         } else {
             
