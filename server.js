@@ -158,7 +158,7 @@ server.get("/messages", async (req,res) => {
         });
 
 
-        if(limit <= 0){
+        if(limit <= 0 || limit === NaN){
 
             return res.sendStatus(422);
 
@@ -207,6 +207,8 @@ server.post("/status", async (req, res) => {
         if(!usuarioExiste) res.sendStatus(404);
 
         await db.collection("participants").updateOne({name: user}, {$set: {lastStatus: Date.now()}});
+
+        return res.sendStatus(200);
 
     }catch (error) {
 
