@@ -187,11 +187,42 @@ server.post("/status", async (req, res) => {
         await db.collection("participants").updateOne({name: user}, {$set: {lastStatus: Date.now()}});
 
     }catch (error) {
-        
+
         console.log(error);
         res.sendStatus(500);
     }
 });
+
+
+setInterval( async () => {
+    const status = Date.now();
+
+    try {
+        const participantes = await db.collection("participants").find().toArray();
+
+        participantes.map(async (participante) => {
+
+            const { lastStatus, name } = participante;
+
+            if(status - lastStatus > 10000){
+
+                await db.collection("participants").deleteOne({ name });
+                await db.collection("messages").insertOne({
+                    from: name,
+                    to: "Todos",
+                    text: "sai da sala...",
+                    type: "status",
+                    time: dayjs().format("HH:mm:ss"),
+                });
+            }
+        });
+    
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+
+},15000);
 
 
 const PORT = 5000;
