@@ -168,15 +168,26 @@ server.get("/messages", async (req,res) => {
                 to: mensagemFormatada.to,
                 text: mensagemFormatada.text,
                 type: mensagemFormatada.type,
-                from: mensagemFormatada.from
+                from: mensagemFormatada.from,
+                time: mensagemFormatada.time
             }));
             
             return res.send(mensagensFiltradasFormatadas);
 
         } else {
-        
-            let start = mensagensFiltradas.length - limit;
-            res.send([...mensagensFiltradas].splice(start,limit));
+            
+            const mensagensFiltradasFormatadas = mensagensFiltradas.map((mensagemFormatada) => ({
+                to: mensagemFormatada.to,
+                text: mensagemFormatada.text,
+                type: mensagemFormatada.type,
+                from: mensagemFormatada.from, 
+                time: mensagemFormatada.time
+            }));
+            
+            let start = mensagensFiltradasFormatadas.length - limit;
+            res.send([...mensagensFiltradasFormatadas].splice(start,limit));
+            return res.send(mensagensFiltradasFormatadas);
+           
         }
         
 
